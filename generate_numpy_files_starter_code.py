@@ -1,17 +1,16 @@
-import cv2
 import numpy as np
 import os
+import cv2
 
-# Get number of files in each class
-TOTAL_0 = len(os.listdir("../datasets/expenses/0"))
-TOTAL_1 = len(os.listdir("../datasets/expenses/1"))
+# Define raw images paths
+PATH_0 = "./dataset/0"
+PATH_1 = "./dataset/1"
 
-# Store dataset paths to variables
-# TODO: Replace with your real paths
-PATH_0 = "../datasets/expenses/0/"
-PATH_1 = "../datasets/expenses/1/"
+# Define image final sizes
+SIZES = (224, 224)
 
-# Create initial arrays to store data
+
+# Create initial numpy variables to store data
 X = []
 Y = []
 

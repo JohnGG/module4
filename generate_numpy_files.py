@@ -1,15 +1,14 @@
-import cv2
 import numpy as np
 import os
+import cv2
 
-# Get number of files in each class
-TOTAL_0 = len(os.listdir("../datasets/expenses/0"))
-TOTAL_1 = len(os.listdir("../datasets/expenses/1"))
+# Define raw images paths
+PATH_0 = "./dataset/0"
+PATH_1 = "./dataset/1"
 
-# Store dataset paths to variables
-# TODO: Replace with your real paths
-PATH_0 = "../datasets/expenses/0/"
-PATH_1 = "../datasets/expenses/1/"
+# Define image final sizes
+SIZES = (224, 224)
+
 
 # Create initial numpy variables to store data
 X = []
@@ -18,14 +17,14 @@ Y = []
 # Loop through class 0 dataset dir
 for filename0 in os.listdir(PATH_0):
     # TODO : Store images image into X, label into Y
-    X.append(cv2.imread(PATH_0+filename0))
+    X.append(cv2.resize(cv2.imread(os.path.join(PATH_0, filename0)), SIZES))
     Y.append(0)
     print(filename0)
 
 # Loop through class 0 dataset dir
 for filename1 in os.listdir(PATH_1):
     # TODO : Store images image into X, label into Y
-    X.append(cv2.imread(PATH_1+filename1))
+    X.append(cv2.resize(cv2.imread(os.path.join(PATH_1, filename1)), SIZES))
     Y.append(1)
     print(filename1)
 
