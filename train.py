@@ -9,22 +9,37 @@ batch_size = 32
 
 # Read dataset
 # TODO : replace with your paths
-X_TRAIN = np.load("./X_TRAIN.npy")
-Y_TRAIN = np.load("./Y_TRAIN.npy")
+X_TRAIN = np.load("./X_TRAIN.npy")[0:500]
+Y_TRAIN = np.load("./Y_TRAIN.npy")[0:500]
 X_VAL = np.load("./X_VAL.npy")
 Y_VAL = np.load("./Y_VAL.npy")
 
 
+def export_protobuf(sess):
+    graph = tf.get_default_graph()
+    input_graph_def = graph.as_graph_def()
+
+    output_node_names = ["pred"]  # <------------------------
+
+    output_graph_def = tf.graph_util.convert_variables_to_constants(
+        sess,  # The session
+        input_graph_def,  # input_graph_def is useful for retrieving the nodes
+        output_node_names
+    )
+
+    with tf.gfile.GFile('model.pb', "wb") as f:
+        f.write(output_graph_def.SerializeToString())
+        return f.size()
 
 ###### MODEL DEFINITION #####
 
 # Define placholders
 # TODO : Replace with the shape you decided to create for inputs
-inputs = tf.placeholder(shape=(None, 80, 80, 3), name="inputs", dtype=tf.float32)
+inputs = tf.placeholder(shape=(None, 224, 224, 3), name="inputs", dtype=tf.float32)
 labels = tf.placeholder(shape=(None, ), name="labels", dtype=tf.int64)
 
 conv1 = tf.layers.conv2d(
-      inputs=tf.reshape(inputs, shape=(-1, 80, 80, 3)),
+      inputs=tf.reshape(inputs, shape=(-1, 224, 224, 3)),
       filters=32,
       kernel_size=[2, 2],
       padding="same",
@@ -46,7 +61,7 @@ pool2_shapes = pool2.get_shape().as_list()
 W = tf.get_variable(name="weights", shape=(pool2_shapes[1]*pool2_shapes[2]*pool2_shapes[3], 2))
 B = tf.get_variable(name="bias2", shape=(2))
 logits = tf.matmul(tf.reshape(pool2, shape=(-1, pool2_shapes[1]*pool2_shapes[2]*pool2_shapes[3])), W) + B
-predictions = tf.argmax(tf.nn.softmax(logits), axis=1)
+predictions = tf.argmax(tf.nn.softmax(logits), axis=1, name="pred")
 
 #Create loss node
 one_hot_labels = tf.one_hot(labels, 2)
@@ -99,6 +114,7 @@ with tf.Session() as sess:
         print(val_acc/nb_val_steps)
         if (val_acc/nb_val_steps) > 0.92:
             save_path = saver.save(sess, "./saved/model.ckpt")
+            export_protobuf()
             break
 
     # Plot losses
