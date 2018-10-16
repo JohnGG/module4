@@ -35,3 +35,7 @@ def company(id_):
         return json.dumps(COMPANIES[id_])
     except KeyError:
         return json.dumps({'error': 'Company not found', 'code': 'err_not_found'}), 404
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
