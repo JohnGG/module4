@@ -1,9 +1,13 @@
-from flask import Flask
+from flask import Flask, request
 import json
 import tensorflow as tf
 import numpy as np
+import cv2
+import os
 
 app = Flask(__name__)
+
+dict_map = ["No boat", "Boat"]
 
 # This could be added to the Flask configuration
 MODEL_PATH = './model.pb'
@@ -40,11 +44,16 @@ output_tensor = output_op.outputs[0]
 @app.route("/predict")
 def company():
     try:
+        # Get image
+        image_name = request.args["image_name"]
+        image = cv2.imread(os.path.join("images", image_name))
+        resized_image = cv2.resize(image, (50, 50))
+
         # Generate placeholders nodes
-        placeholders = {input_tensor: [np.zeros(shape=(50, 50, 3))]}
+        placeholders = {input_tensor: [resized_image]}
         preds = sess.run(output_tensor, placeholders)
-        print(preds)
-        return json.dumps({})
+
+        return json.dumps({"prediction": dict_map[preds[0]]})
     except KeyError:
         return json.dumps({'error': 'Company not found', 'code': 'err_not_found'}), 404
 
